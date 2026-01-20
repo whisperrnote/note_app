@@ -35,7 +35,7 @@ class AppTheme {
           fontSize: 16,
           fontWeight: FontWeight.w400,
           color: AppColors.titanium,
-          lineHeight: 1.6,
+          height: 1.6,
         ),
         bodyMedium: GoogleFonts.inter(
           fontSize: 14,
