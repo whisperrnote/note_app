@@ -10,6 +10,8 @@ import 'create_note_screen.dart';
 
 import '../widgets/glass_card.dart';
 
+import 'settings_screen.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -66,7 +68,12 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(width: 8),
                   // Profile/Account
                   GestureDetector(
-                    onTap: () => _showAccountMenu(context),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                      );
+                    },
                     child: Container(
                       width: 36, height: 36,
                       decoration: BoxDecoration(
