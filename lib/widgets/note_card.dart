@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../core/theme/colors.dart';
+import 'glass_card.dart';
 
 class NoteCard extends StatelessWidget {
   final String title;
@@ -32,19 +33,8 @@ class NoteCard extends StatelessWidget {
         HapticFeedback.mediumImpact();
         onLongPress();
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface.withOpacity(0.9),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.borderSubtle),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+      child: GlassCard(
+        opacity: 0.4,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -62,7 +52,7 @@ class NoteCard extends StatelessWidget {
                       style: GoogleFonts.spaceGrotesk(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.electric,
+                        color: AppColors.titanium,
                         height: 1.2,
                       ),
                     ),

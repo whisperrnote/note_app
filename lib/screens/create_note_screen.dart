@@ -5,6 +5,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../core/theme/colors.dart';
 
+import '../widgets/glass_card.dart';
+
 class CreateNoteScreen extends StatefulWidget {
   const CreateNoteScreen({super.key});
 
@@ -69,7 +71,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.electric.withOpacity(0.15),
+                    AppColors.electric.withOpacity(0.1),
                     Colors.transparent,
                   ],
                 ),
@@ -96,16 +98,19 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                         TextField(
                           controller: _titleController,
                           style: GoogleFonts.spaceGrotesk(
-                            fontSize: 24,
+                            fontSize: 28,
                             fontWeight: FontWeight.bold,
                             color: AppColors.titanium,
+                            letterSpacing: -0.5,
                           ),
                           decoration: InputDecoration(
-                            hintText: 'Title your odyssey...',
+                            hintText: 'Title your thought...',
                             hintStyle: GoogleFonts.spaceGrotesk(
-                              color: AppColors.gunmetal.withOpacity(0.5),
+                              color: AppColors.gunmetal.withOpacity(0.3),
                             ),
                             border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
                             contentPadding: EdgeInsets.zero,
                           ),
                           textCapitalization: TextCapitalization.sentences,
@@ -114,13 +119,9 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                         const SizedBox(height: 32),
 
                         // Privacy Toggle
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppColors.surface2,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AppColors.borderSubtle),
-                          ),
+                        GlassCard(
+                          opacity: 0.4,
+                          padding: const EdgeInsets.all(20),
                           child: Row(
                             children: [
                               Expanded(
@@ -128,20 +129,21 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'PRIVACY MODE',
+                                      'VAULT STATUS',
                                       style: GoogleFonts.spaceGrotesk(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.titanium,
-                                        letterSpacing: 1,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w900,
+                                        color: AppColors.gunmetal,
+                                        letterSpacing: 1.5,
                                       ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      _isPublic ? 'Publicly visible' : 'Vaulted session (Encrypted)',
+                                      _isPublic ? 'Publicly shared' : 'End-to-End Encrypted',
                                       style: GoogleFonts.inter(
-                                        fontSize: 12,
-                                        color: AppColors.gunmetal,
+                                        fontSize: 13,
+                                        color: AppColors.titanium,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ],
@@ -153,7 +155,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                                 activeColor: AppColors.electric,
                                 activeTrackColor: AppColors.electricDim,
                                 inactiveThumbColor: AppColors.gunmetal,
-                                inactiveTrackColor: AppColors.surface,
+                                inactiveTrackColor: AppColors.surface2,
                               ),
                             ],
                           ),
@@ -164,157 +166,109 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                         // Content Area
                         _buildLabel('MANIFESTATION'),
                         
-                        // Format Switcher
-                        Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          decoration: BoxDecoration(
-                            color: AppColors.surface2,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.borderSubtle),
+                        TextField(
+                          controller: _contentController,
+                          maxLines: null,
+                          minLines: 12,
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            color: AppColors.titanium,
+                            height: 1.7,
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _buildFormatToggle('text', LucideIcons.fileText),
-                              _buildFormatToggle('doodle', LucideIcons.pencil),
-                            ],
+                          decoration: InputDecoration(
+                            hintText: 'Transcribe your consciousness...',
+                            hintStyle: GoogleFonts.inter(
+                              color: AppColors.gunmetal.withOpacity(0.5),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: const BorderSide(color: AppColors.borderSubtle),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: const BorderSide(color: AppColors.borderSubtle),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: const BorderSide(color: AppColors.electric, width: 1.5),
+                            ),
+                            filled: true,
+                            fillColor: AppColors.surface.withOpacity(0.3),
+                            contentPadding: const EdgeInsets.all(24),
                           ),
                         ),
-
-                        if (_format == 'text')
-                          TextField(
-                            controller: _contentController,
-                            maxLines: null,
-                            minLines: 8,
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              color: AppColors.titanium,
-                              height: 1.6,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: 'Transcribe your consciousness...',
-                              hintStyle: GoogleFonts.inter(
-                                color: AppColors.gunmetal,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: AppColors.borderSubtle),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(color: AppColors.borderSubtle),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: AppColors.electric),
-                              ),
-                              filled: true,
-                              fillColor: AppColors.surface2,
-                              contentPadding: const EdgeInsets.all(20),
-                            ),
-                          )
-                        else
-                          Container(
-                            height: 300,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: AppColors.surface2,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: AppColors.borderSubtle, 
-                                style: BorderStyle.solid
-                              ),
-                            ),
-                            child: Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.electricDim,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(LucideIcons.pencil, color: AppColors.electric, size: 32),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'Canvas Mode',
-                                    style: GoogleFonts.spaceGrotesk(
-                                      color: AppColors.titanium,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Tap to open infinite canvas',
-                                    style: GoogleFonts.inter(
-                                      color: AppColors.gunmetal,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
 
                         const SizedBox(height: 32),
 
                         // Tags
                         _buildLabel('METADATA'),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _tagController,
-                                style: GoogleFonts.inter(color: AppColors.titanium),
-                                decoration: InputDecoration(
-                                  hintText: 'Add a tag...',
-                                  hintStyle: GoogleFonts.inter(color: AppColors.gunmetal),
-                                  isDense: true,
-                                  filled: true,
-                                  fillColor: AppColors.surface2,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide.none,
+                        GlassCard(
+                          opacity: 0.3,
+                          padding: const EdgeInsets.all(8),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _tagController,
+                                  style: GoogleFonts.inter(color: AppColors.titanium),
+                                  decoration: InputDecoration(
+                                    hintText: 'Add a tag...',
+                                    hintStyle: GoogleFonts.inter(color: AppColors.gunmetal, fontSize: 14),
+                                    isDense: true,
+                                    filled: false,
+                                    border: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                   ),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  onSubmitted: (_) => _addTag(),
                                 ),
-                                onSubmitted: (_) => _addTag(),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            IconButton(
-                              onPressed: _addTag,
-                              style: IconButton.styleFrom(
-                                backgroundColor: AppColors.electric,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              IconButton(
+                                onPressed: _addTag,
+                                style: IconButton.styleFrom(
+                                  backgroundColor: AppColors.surface2,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                icon: const Icon(LucideIcons.plus, color: AppColors.electric, size: 20),
                               ),
-                              icon: const Icon(LucideIcons.plus, color: AppColors.voidBg),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: _tags.map((tag) => Chip(
-                            label: Text(tag),
-                            labelStyle: GoogleFonts.spaceGrotesk(
-                              color: AppColors.electric,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                          children: _tags.map((tag) => Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: AppColors.electricDim,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: AppColors.electric.withOpacity(0.2)),
                             ),
-                            backgroundColor: AppColors.electricDim,
-                            side: const BorderSide(color: AppColors.electricDim),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            onDeleted: () => _removeTag(tag),
-                            deleteIcon: const Icon(LucideIcons.x, size: 14, color: AppColors.electric),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  tag.toUpperCase(),
+                                  style: GoogleFonts.spaceGrotesk(
+                                    color: AppColors.electric,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                GestureDetector(
+                                  onTap: () => _removeTag(tag),
+                                  child: const Icon(LucideIcons.x, size: 12, color: AppColors.electric),
+                                ),
+                              ],
+                            ),
                           )).toList(),
                         ),
                         
-                        const SizedBox(height: 100), // Spacing for safe area
+                        const SizedBox(height: 120),
                       ],
                     ),
                   ),
@@ -326,28 +280,23 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
           // Bottom Actions
           Positioned(
             left: 0, right: 0, bottom: 0,
-            child: Container(
+            child: GlassCard(
+              borderRadius: BorderRadius.zero,
+              opacity: 0.9,
+              border: const Border(top: BorderSide(color: AppColors.borderSubtle)),
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
-              decoration: BoxDecoration(
-                color: AppColors.voidBg.withOpacity(0.9),
-                border: const Border(top: BorderSide(color: AppColors.borderSubtle)),
-                backdropFilter: null, // Note: BackdropFilter is expensive in Flutter, using opacity for now
-              ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'DISCARD',
-                      style: GoogleFonts.spaceGrotesk(
-                        color: AppColors.gunmetal,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1,
-                      ),
-                    ),
+                  Row(
+                    children: [
+                      _buildBottomAction(LucideIcons.image, () {}),
+                      const SizedBox(width: 12),
+                      _buildBottomAction(LucideIcons.mic, () {}),
+                      const SizedBox(width: 12),
+                      _buildBottomAction(LucideIcons.sparkles, () {}),
+                    ],
                   ),
-                  const SizedBox(width: 16),
                   ElevatedButton(
                     onPressed: _isLoading ? null : _handleSave,
                     style: ElevatedButton.styleFrom(
@@ -357,8 +306,6 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      elevation: 0,
-                      shadowColor: AppColors.electric.withOpacity(0.5),
                     ),
                     child: _isLoading 
                     ? const SizedBox(
@@ -382,49 +329,59 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
     );
   }
 
+  Widget _buildBottomAction(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 44, height: 44,
+        decoration: BoxDecoration(
+          color: AppColors.surface2,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.borderSubtle),
+        ),
+        child: Icon(icon, size: 20, color: AppColors.gunmetal),
+      ),
+    );
+  }
+
   Widget _buildHeader() {
-    return Padding(
+    return GlassCard(
+      borderRadius: BorderRadius.zero,
+      opacity: 0.8,
+      border: const Border(bottom: BorderSide(color: AppColors.borderSubtle)),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.electric, Color(0xFF00D1FF)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: AppColors.surface2,
               borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.electric.withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              border: Border.all(color: AppColors.borderSubtle),
             ),
-            child: const Icon(LucideIcons.filePlus, color: AppColors.voidBg, size: 24),
+            child: const Icon(LucideIcons.filePlus, color: AppColors.electric, size: 20),
           ),
           const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'New Thought',
+                'MANIFEST',
                 style: GoogleFonts.spaceGrotesk(
-                  fontSize: 20,
+                  fontSize: 10,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.titanium,
-                  height: 1.1,
+                  color: AppColors.electric,
+                  letterSpacing: 2,
                 ),
               ),
+              const SizedBox(height: 2),
               Text(
-                'Capture your brilliance',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: AppColors.gunmetal,
-                  fontWeight: FontWeight.w500,
+                'New Thought',
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.titanium,
+                  height: 1.1,
                 ),
               ),
             ],
@@ -432,7 +389,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
           const Spacer(),
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(LucideIcons.x, color: AppColors.gunmetal),
+            icon: const Icon(LucideIcons.x, color: AppColors.gunmetal, size: 20),
           ),
         ],
       ),

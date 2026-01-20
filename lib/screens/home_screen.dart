@@ -8,6 +8,8 @@ import '../widgets/note_card.dart';
 import '../core/providers/auth_provider.dart';
 import 'create_note_screen.dart';
 
+import '../widgets/glass_card.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -18,12 +20,12 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // App Header (Replicating AppHeader.tsx)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: AppColors.borderSubtle)),
-              ),
+            // App Header (Replicating AppHeader.tsx with Glassmorphism)
+            GlassCard(
+              borderRadius: BorderRadius.zero,
+              border: const Border(bottom: BorderSide(color: AppColors.borderSubtle)),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              opacity: 0.8,
               child: Row(
                 children: [
                   // Logo Area
@@ -62,8 +64,6 @@ class HomeScreen extends StatelessWidget {
                   // Action Icons
                   _buildHeaderAction(LucideIcons.sparkles, () {}),
                   const SizedBox(width: 8),
-                  _buildHeaderAction(LucideIcons.layoutGrid, () {}),
-                  const SizedBox(width: 8),
                   // Profile/Account
                   GestureDetector(
                     onTap: () => _showAccountMenu(context),
@@ -91,19 +91,20 @@ class HomeScreen extends StatelessWidget {
 
             // Tags / Filters
             Container(
-              height: 50,
+              height: 60,
               decoration: const BoxDecoration(
                  border: Border(bottom: BorderSide(color: AppColors.borderSubtle)),
               ),
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 children: [
-                  _buildTagChip('All', true),
+                  _buildTagChip('All Notes', true),
+                  _buildTagChip('Recent', false),
                   _buildTagChip('Ideas', false),
                   _buildTagChip('Work', false),
                   _buildTagChip('Life', false),
-                  _buildTagChip('Projects', false),
+                  _buildTagChip('Archive', false),
                 ],
               ),
             ),
@@ -114,45 +115,61 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(24),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 0.8,
+                  childAspectRatio: 0.85,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                 ),
                 itemCount: 8,
                 itemBuilder: (context, index) {
                   return NoteCard(
-                    title: index == 0 ? 'Project Alpha Specs' : (index == 1 ? 'Startup Ideas 2024' : ''),
-                    content: 'This is a snippet of the note content. Ideally this would be rich text or a checklist preview...',
-                    tags: index < 3 ? ['work', 'urgent'] : [],
+                    title: index == 0 ? 'Glass Monolith Design' : (index == 1 ? 'AI System Architecture' : ''),
+                    content: index == 0 
+                      ? 'The aesthetic is "Quiet Power." We do not shout. We operate in the void...'
+                      : 'Modular integration of Google Gemini AI across the ecosystem apps...',
+                    tags: index == 0 ? ['design', 'brand'] : (index == 1 ? ['ai', 'tech'] : []),
                     isPinned: index < 2,
                     isPublic: index == 2,
                     onTap: () {
-                       // Open detail/edit screen
                        Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const CreateNoteScreen()),
                       );
                     },
                     onLongPress: () {
-                      // Show context menu
                       _showContextMenu(context);
                     },
-                  ).animate().fadeIn(duration: 400.ms, delay: (index * 50).ms).slideY(begin: 0.1, end: 0);
+                  ).animate().fadeIn(duration: 400.ms, delay: (index * 50).ms).scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1));
                 },
               ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CreateNoteScreen()),
-          );
-        },
-        backgroundColor: AppColors.electric,
-        child: const Icon(LucideIcons.plus, color: AppColors.voidBg),
+      floatingActionButton: Container(
+        height: 64, width: 64,
+        decoration: BoxDecoration(
+          color: AppColors.electric,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.electric.withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CreateNoteScreen()),
+            );
+          },
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          highlightElevation: 0,
+          child: const Icon(LucideIcons.plus, color: AppColors.voidBg, size: 32),
+        ),
       ),
     );
   }
