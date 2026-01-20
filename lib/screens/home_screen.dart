@@ -10,7 +10,7 @@ import 'create_note_screen.dart';
 
 import '../widgets/glass_card.dart';
 
-import 'settings_screen.dart';
+import '../core/theme/glass_route.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -71,7 +71,7 @@ class HomeScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                        GlassRoute(page: const SettingsScreen()),
                       );
                     },
                     child: Container(
@@ -139,7 +139,7 @@ class HomeScreen extends StatelessWidget {
                     onTap: () {
                        Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const CreateNoteScreen()),
+                        GlassRoute(page: const CreateNoteScreen()),
                       );
                     },
                     onLongPress: () {
@@ -169,7 +169,7 @@ class HomeScreen extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const CreateNoteScreen()),
+              GlassRoute(page: const CreateNoteScreen()),
             );
           },
           backgroundColor: Colors.transparent,
