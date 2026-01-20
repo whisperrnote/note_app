@@ -5,22 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../core/theme/colors.dart';
 
-class AuthProvider extends ChangeNotifier {
-  bool _isAuthenticated = false;
-  bool get isAuthenticated => _isAuthenticated;
-
-  Future<void> login(String email, String password) async {
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
-    _isAuthenticated = true;
-    notifyListeners();
-  }
-
-  void logout() {
-    _isAuthenticated = false;
-    notifyListeners();
-  }
-}
+import '../core/providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

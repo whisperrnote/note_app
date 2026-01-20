@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../core/theme/colors.dart';
 import '../widgets/note_card.dart';
-import 'login_screen.dart';
+import '../core/providers/auth_provider.dart';
 import 'create_note_screen.dart';
 
 class HomeScreen extends StatelessWidget {
