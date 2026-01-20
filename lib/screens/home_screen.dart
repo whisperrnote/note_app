@@ -10,6 +10,7 @@ import 'create_note_screen.dart';
 
 import '../widgets/glass_card.dart';
 
+import 'focus_mode_screen.dart';
 import '../core/theme/glass_route.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -64,7 +65,12 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   // Action Icons
-                  _buildHeaderAction(LucideIcons.sparkles, () {}),
+                  _buildHeaderAction(LucideIcons.sparkles, () {
+                    Navigator.push(
+                      context,
+                      GlassRoute(page: const focusModeScreen()),
+                    );
+                  }),
                   const SizedBox(width: 8),
                   // Profile/Account
                   GestureDetector(
