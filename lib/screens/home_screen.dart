@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../core/theme/colors.dart';
+import '../widgets/note_card.dart';
 import 'login_screen.dart';
 import 'create_note_screen.dart';
 
@@ -16,111 +18,126 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+            // App Header (Replicating AppHeader.tsx)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              decoration: const BoxDecoration(
+                border: Border(bottom: BorderSide(color: AppColors.borderSubtle)),
+              ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Notes',
-                        style: GoogleFonts.spaceGrotesk(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.titanium,
-                          height: 1.1,
+                  // Logo Area
+                  Container(
+                    width: 40, height: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface2,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.borderSubtle),
+                    ),
+                    child: const Icon(LucideIcons.feather, color: AppColors.electric, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  // Search Area
+                  Expanded(
+                    child: SizedBox(
+                      height: 40,
+                      child: TextField(
+                        style: GoogleFonts.inter(color: AppColors.titanium, fontSize: 13),
+                        decoration: InputDecoration(
+                          hintText: 'Search your second brain...',
+                          hintStyle: GoogleFonts.inter(color: AppColors.gunmetal),
+                          filled: true,
+                          fillColor: AppColors.surface.withOpacity(0.5),
+                          prefixIcon: const Icon(LucideIcons.search, size: 16, color: AppColors.gunmetal),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: EdgeInsets.zero,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Text(
-                            'Syncing ',
-                            style: GoogleFonts.inter(
-                              color: AppColors.gunmetal,
-                              fontSize: 14,
-                            ),
-                          ),
-                          Text(
-                            '12',
-                            style: GoogleFonts.inter(
-                              color: AppColors.electric,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: GoogleFonts.spaceMono().fontFamily,
-                              fontSize: 14,
-                            ),
-                          ),
-                          Text(
-                            ' of ',
-                            style: GoogleFonts.inter(
-                              color: AppColors.gunmetal,
-                              fontSize: 14,
-                            ),
-                          ),
-                          Text(
-                            '142',
-                            style: GoogleFonts.inter(
-                              color: AppColors.titanium,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: GoogleFonts.spaceMono().fontFamily,
-                              fontSize: 14,
-                            ),
-                          ),
-                          Text(
-                            ' notes',
-                            style: GoogleFonts.inter(
-                              color: AppColors.gunmetal,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
                   ),
-                  IconButton(
-                    onPressed: () => context.read<AuthProvider>().logout(),
-                    icon: const Icon(LucideIcons.logOut, color: AppColors.gunmetal),
+                  const SizedBox(width: 12),
+                  // Action Icons
+                  _buildHeaderAction(LucideIcons.sparkles, () {}),
+                  const SizedBox(width: 8),
+                  _buildHeaderAction(LucideIcons.layoutGrid, () {}),
+                  const SizedBox(width: 8),
+                  // Profile/Account
+                  GestureDetector(
+                    onTap: () => _showAccountMenu(context),
+                    child: Container(
+                      width: 36, height: 36,
+                      decoration: BoxDecoration(
+                        color: AppColors.electric,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.voidBg, width: 2),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'U',
+                          style: GoogleFonts.spaceGrotesk(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.voidBg,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 32),
-
-            // Tags
-            SizedBox(
-              height: 40,
+            // Tags / Filters
+            Container(
+              height: 50,
+              decoration: const BoxDecoration(
+                 border: Border(bottom: BorderSide(color: AppColors.borderSubtle)),
+              ),
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                 children: [
-                  _buildTag('All', true),
-                  _buildTag('Personal', false),
-                  _buildTag('Work', false),
-                  _buildTag('Ideas', false),
-                  _buildTag('Journal', false),
+                  _buildTagChip('All', true),
+                  _buildTagChip('Ideas', false),
+                  _buildTagChip('Work', false),
+                  _buildTagChip('Life', false),
+                  _buildTagChip('Projects', false),
                 ],
               ),
             ),
 
-            const SizedBox(height: 24),
-
-            // Notes Grid
+            // Main Content Area
             Expanded(
               child: GridView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
+                padding: const EdgeInsets.all(24),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
+                  childAspectRatio: 0.8,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 0.85,
                 ),
-                itemCount: 6,
+                itemCount: 8,
                 itemBuilder: (context, index) {
-                  return _buildNoteCard(index);
+                  return NoteCard(
+                    title: index == 0 ? 'Project Alpha Specs' : (index == 1 ? 'Startup Ideas 2024' : ''),
+                    content: 'This is a snippet of the note content. Ideally this would be rich text or a checklist preview...',
+                    tags: index < 3 ? ['work', 'urgent'] : [],
+                    isPinned: index < 2,
+                    isPublic: index == 2,
+                    onTap: () {
+                       // Open detail/edit screen
+                       Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CreateNoteScreen()),
+                      );
+                    },
+                    onLongPress: () {
+                      // Show context menu
+                      _showContextMenu(context);
+                    },
+                  ).animate().fadeIn(duration: 400.ms, delay: (index * 50).ms).slideY(begin: 0.1, end: 0);
                 },
               ),
             ),
@@ -140,73 +157,107 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTag(String label, bool isActive) {
+  Widget _buildHeaderAction(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36, height: 36,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.borderSubtle),
+        ),
+        child: Icon(icon, size: 16, color: AppColors.electric),
+      ),
+    );
+  }
+
+  Widget _buildTagChip(String label, bool isSelected) {
     return Container(
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+      alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: isActive ? AppColors.electric : Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
+        color: isSelected ? AppColors.electric : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isActive ? AppColors.electric : AppColors.borderSubtle,
+          color: isSelected ? AppColors.electric : AppColors.borderSubtle
         ),
       ),
-      alignment: Alignment.center,
       child: Text(
         label,
         style: GoogleFonts.inter(
-          color: isActive ? AppColors.voidBg : AppColors.titanium,
+          color: isSelected ? AppColors.voidBg : AppColors.gunmetal,
           fontWeight: FontWeight.w600,
-          fontSize: 13,
+          fontSize: 12,
         ),
       ),
     );
   }
 
-  Widget _buildNoteCard(int index) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.borderSubtle),
+  void _showAccountMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.voidBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Project Alpha',
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.spaceGrotesk(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.titanium,
-              height: 1.2,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('ACCOUNT', style: GoogleFonts.spaceMono(color: AppColors.gunmetal, fontSize: 10, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(LucideIcons.logOut, color: Colors.red),
+              title: Text('Sign Out', style: GoogleFonts.inter(color: Colors.red, fontWeight: FontWeight.w600)),
+              onTap: () {
+                 Navigator.pop(context);
+                 context.read<AuthProvider>().logout();
+              },
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Meeting notes regarding the new architecture deployment...',
-            maxLines: 4,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              color: AppColors.gunmetal,
-              height: 1.5,
-            ),
-          ),
-          const Spacer(),
-          Text(
-            '2h ago',
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              color: AppColors.electric,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  void _showContextMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Wrap(
+          children: [
+            _buildContextItem(LucideIcons.pin, 'Pin Note'),
+            _buildContextItem(LucideIcons.share2, 'Share'),
+            _buildContextItem(LucideIcons.copy, 'Duplicate'),
+            const Divider(color: AppColors.borderSubtle, height: 32),
+            _buildContextItem(LucideIcons.trash2, 'Delete', isDestructive: true),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContextItem(IconData icon, String label, {bool isDestructive = false}) {
+    return ListTile(
+      leading: Icon(icon, color: isDestructive ? Colors.red : AppColors.titanium),
+      title: Text(
+        label, 
+        style: GoogleFonts.inter(
+          color: isDestructive ? Colors.red : AppColors.titanium,
+          fontWeight: FontWeight.w600
+        )
+      ),
+      onTap: () {},
     );
   }
 }
