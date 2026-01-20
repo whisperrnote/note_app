@@ -7,6 +7,10 @@ import '../core/theme/colors.dart';
 
 import '../widgets/glass_card.dart';
 
+class SaveIntent extends Intent {
+  const SaveIntent();
+}
+
 class CreateNoteScreen extends StatefulWidget {
   const CreateNoteScreen({super.key});
 
@@ -56,10 +60,20 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.voidBg,
-      body: Stack(
-        children: [
+    return Shortcuts(
+      shortcuts: <LogicalKeySet, Intent>{
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS): const SaveIntent(),
+        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyS): const SaveIntent(),
+      },
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          SaveIntent: CallbackAction<SaveIntent>(onInvoke: (intent) => _handleSave()),
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.voidBg,
+          body: Stack(
+            children: [
+
           // Ambient Background Glow
           Positioned(
             top: -100,
