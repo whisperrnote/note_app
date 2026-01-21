@@ -94,84 +94,87 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.voidBg,
-      body: Stack(
-        children: [
-          SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.all(24),
-                    children: [
-                      if (_isEditing) ...[
-                        _buildLabel('DESIGNATION'),
-                        TextField(
-                          controller: _titleController,
-                          style: GoogleFonts.spaceGrotesk(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.titanium,
+    return Hero(
+      tag: 'note_${widget.note.title}_${widget.note.content.hashCode}',
+      child: Scaffold(
+        backgroundColor: AppColors.voidBg,
+        body: Stack(
+          children: [
+            SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(),
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.all(24),
+                      children: [
+                        if (_isEditing) ...[
+                          _buildLabel('DESIGNATION'),
+                          TextField(
+                            controller: _titleController,
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.titanium,
+                            ),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Title...',
+                            ),
                           ),
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Title...',
+                        ] else
+                          Text(
+                            _titleController.text,
+                            style: GoogleFonts.spaceGrotesk(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.titanium,
+                            ),
                           ),
-                        ),
-                      ] else
-                        Text(
-                          _titleController.text,
-                          style: GoogleFonts.spaceGrotesk(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.titanium,
-                          ),
-                        ),
-                      const SizedBox(height: 12),
-                      _buildMetaRow(),
-                      const SizedBox(height: 32),
-                      RepaintBoundary(child: _buildDoodleSection()),
-                      const SizedBox(height: 12),
-                      _buildAttachmentSection(),
-                      const SizedBox(height: 12),
-                      _buildContentSection(),
-                      const SizedBox(height: 40),
-                      if (!_isEditing) _buildCollaborationSection(),
-                    ],
+                        const SizedBox(height: 12),
+                        _buildMetaRow(),
+                        const SizedBox(height: 32),
+                        RepaintBoundary(child: _buildDoodleSection()),
+                        const SizedBox(height: 12),
+                        _buildAttachmentSection(),
+                        const SizedBox(height: 12),
+                        _buildContentSection(),
+                        const SizedBox(height: 40),
+                        if (!_isEditing) _buildCollaborationSection(),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          if (_isEditing)
-            Positioned(
-              bottom: 24,
-              right: 24,
-              child: FloatingActionButton.extended(
-                onPressed: _isLoading ? null : _handleSave,
-                backgroundColor: AppColors.electric,
-                icon: _isLoading
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.voidBg,
-                        ),
-                      )
-                    : const Icon(LucideIcons.save, color: AppColors.voidBg),
-                label: Text(
-                  'SAVE',
-                  style: GoogleFonts.spaceGrotesk(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.voidBg,
+            if (_isEditing)
+              Positioned(
+                bottom: 24,
+                right: 24,
+                child: FloatingActionButton.extended(
+                  onPressed: _isLoading ? null : _handleSave,
+                  backgroundColor: AppColors.electric,
+                  icon: _isLoading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.voidBg,
+                          ),
+                        )
+                      : const Icon(LucideIcons.save, color: AppColors.voidBg),
+                  label: Text(
+                    'SAVE',
+                    style: GoogleFonts.spaceGrotesk(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.voidBg,
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

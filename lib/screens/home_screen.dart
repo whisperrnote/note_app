@@ -5,13 +5,15 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../core/theme/colors.dart';
+import '../core/ui_kit/glass_card.dart';
+import '../core/ui_kit/header_action.dart';
+import '../core/ui_kit/profile_icon.dart';
 import '../widgets/note_card.dart';
 import '../core/providers/auth_provider.dart';
 import '../core/services/notes_service.dart';
 import '../core/models/note_model.dart';
 import 'create_note_screen.dart';
 import 'note_detail_screen.dart';
-import '../widgets/glass_card.dart';
 import 'focus_mode_screen.dart';
 import 'settings_screen.dart';
 import '../core/theme/glass_route.dart';
@@ -351,18 +353,33 @@ class _HomeHeader extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           if (isDesktop)
-            _HeaderAction(LucideIcons.plus, () {
+            HeaderAction(
+              icon: LucideIcons.plus,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  GlassRoute(page: const CreateNoteScreen()),
+                );
+              },
+              isPrimary: true,
+            ),
+          const SizedBox(width: 8),
+          HeaderAction(
+            icon: LucideIcons.sparkles,
+            onTap: () {
               Navigator.push(
                 context,
-                GlassRoute(page: const CreateNoteScreen()),
+                GlassRoute(page: const focusModeScreen()),
               );
-            }, isPrimary: true),
+            },
+          ),
           const SizedBox(width: 8),
-          _HeaderAction(LucideIcons.sparkles, () {
-            Navigator.push(context, GlassRoute(page: const focusModeScreen()));
-          }),
-          const SizedBox(width: 8),
-          _ProfileIcon(),
+          ProfileIcon(
+            label: 'U',
+            onTap: () {
+              Navigator.push(context, GlassRoute(page: const SettingsScreen()));
+            },
+          ),
         ],
       ),
     );
