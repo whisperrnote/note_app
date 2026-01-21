@@ -6,21 +6,65 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../core/theme/colors.dart';
 import '../widgets/note_card.dart';
 import '../core/providers/auth_provider.dart';
+import '../core/services/notes_service.dart';
+import '../core/models/note_model.dart';
 import 'create_note_screen.dart';
+import 'note_detail_screen.dart';
 import '../widgets/glass_card.dart';
 import 'focus_mode_screen.dart';
 import '../core/theme/glass_route.dart';
 import '../widgets/responsive_layout.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final NotesService _notesService = NotesService();
+  List<Note> _notes = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNotes();
+  }
+
+  Future<void> _fetchNotes() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (authProvider.user != null) {
+      try {
+        final notes = await _notesService.listNotes(authProvider.user!.$id);
+        setState(() {
+          _notes = notes;
+          _isLoading = false;
+        });
+      } catch (e) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.voidBg,
       body: SafeArea(
-        child: ResponsiveLayout(mobile: _MobileHome(), desktop: _DesktopHome()),
+        child: ResponsiveLayout(
+          mobile: _MobileHome(
+            notes: _notes,
+            isLoading: _isLoading,
+            onRefresh: _fetchNotes,
+          ),
+          desktop: _DesktopHome(
+            notes: _notes,
+            isLoading: _isLoading,
+            onRefresh: _fetchNotes,
+          ),
+        ),
       ),
       floatingActionButton: ResponsiveLayout.isDesktop(context)
           ? null
@@ -44,8 +88,12 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       child: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(context, GlassRoute(page: const CreateNoteScreen()));
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            GlassRoute(page: const CreateNoteScreen()),
+          );
+          _fetchNotes();
         },
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -57,32 +105,70 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _MobileHome extends StatelessWidget {
+  final List<Note> notes;
+  final bool isLoading;
+  final Future<void> Function() onRefresh;
+
+  const _MobileHome({
+    required this.notes,
+    required this.isLoading,
+    required this.onRefresh,
+  });
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _HomeHeader(),
-        _TagsSection(),
-        Expanded(child: _NotesGrid(crossAxisCount: 2)),
-      ],
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      color: AppColors.electric,
+      backgroundColor: AppColors.surface,
+      child: Column(
+        children: [
+          const _HomeHeader(),
+          const _TagsSection(),
+          Expanded(
+            child: _NotesGrid(
+              crossAxisCount: 2,
+              notes: notes,
+              isLoading: isLoading,
+              onRefresh: onRefresh,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 class _DesktopHome extends StatelessWidget {
+  final List<Note> notes;
+  final bool isLoading;
+  final Future<void> Function() onRefresh;
+
+  const _DesktopHome({
+    required this.notes,
+    required this.isLoading,
+    required this.onRefresh,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // Desktop Sidebar
         _DesktopSidebar(),
         const VerticalDivider(width: 1, color: AppColors.borderSubtle),
         Expanded(
           child: Column(
             children: [
-              _HomeHeader(isDesktop: true),
-              _TagsSection(),
-              Expanded(child: _NotesGrid(crossAxisCount: 3)),
+              _HomeHeader(isDesktop: true, onRefresh: onRefresh),
+              const _TagsSection(),
+              Expanded(
+                child: _NotesGrid(
+                  crossAxisCount: 3,
+                  notes: notes,
+                  isLoading: isLoading,
+                  onRefresh: onRefresh,
+                ),
+              ),
             ],
           ),
         ),

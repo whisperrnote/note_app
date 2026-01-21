@@ -58,11 +58,11 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
     try {
       if (authProvider.user != null) {
         await _notesService.createNote(
-          authProvider.user!.$id,
-          _titleController.text,
-          _contentController.text,
-          _tags,
-          _isPublic,
+          userId: authProvider.user!.$id,
+          title: _titleController.text,
+          content: _contentController.text,
+          tags: _tags,
+          isPublic: _isPublic,
         );
         if (mounted) Navigator.pop(context);
       }
