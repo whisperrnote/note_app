@@ -193,44 +193,6 @@ class _MobileHome extends StatelessWidget {
   }
 }
 
-class _DesktopHome extends StatelessWidget {
-  final List<Note> notes;
-  final bool isLoading;
-  final Future<void> Function() onRefresh;
-
-  const _DesktopHome({
-    required this.notes,
-    required this.isLoading,
-    required this.onRefresh,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _DesktopSidebar(),
-        const VerticalDivider(width: 1, color: AppColors.borderSubtle),
-        Expanded(
-          child: Column(
-            children: [
-              _HomeHeader(isDesktop: true, onRefresh: onRefresh),
-              _TagsSection(),
-              Expanded(
-                child: _NotesGrid(
-                  crossAxisCount: 3,
-                  notes: notes,
-                  isLoading: isLoading,
-                  onRefresh: onRefresh,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _DesktopSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -584,11 +546,15 @@ class _NotesGrid extends StatelessWidget {
               isPublic: note.isPublic,
               doodleData: note.doodleData,
               onTap: () async {
-                await Navigator.push(
-                  context,
-                  GlassRoute(page: NoteDetailScreen(note: note)),
-                );
-                onRefresh();
+                if (onNoteSelected != null) {
+                  onNoteSelected!(note);
+                } else {
+                  await Navigator.push(
+                    context,
+                    GlassRoute(page: NoteDetailScreen(note: note)),
+                  );
+                  onRefresh();
+                }
               },
               onLongPress: () {
                 _showContextMenu(context, note);
