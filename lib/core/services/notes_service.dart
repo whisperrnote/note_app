@@ -2,6 +2,7 @@ import 'package:appwrite/appwrite.dart';
 import '../constants/appwrite_constants.dart';
 import 'appwrite_service.dart';
 import '../models/note_model.dart';
+import '../models/user_model.dart';
 
 class NotesService {
   final Databases _databases = AppwriteService().databases;
@@ -172,5 +173,36 @@ class NotesService {
           fileId: fileId,
         )
         .toString();
+  }
+
+  Future<List<UserModel>> searchUsers(String query) async {
+    try {
+      final response = await _databases.listDocuments(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.usersCollectionId,
+        queries: [
+          Query.or([Query.search('name', query), Query.search('email', query)]),
+          Query.limit(5),
+        ],
+      );
+      return response.documents
+          .map((doc) => UserModel.fromJson(doc.data))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to search users: $e');
+    }
+  }
+
+  Future<UserModel?> getUserById(String userId) async {
+    try {
+      final doc = await _databases.getDocument(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.usersCollectionId,
+        documentId: userId,
+      );
+      return UserModel.fromJson(doc.data);
+    } catch (e) {
+      return null;
+    }
   }
 }

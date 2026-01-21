@@ -527,6 +527,7 @@ class _NotesGrid extends StatelessWidget {
               tags: note.tags,
               isPinned: note.isPinned,
               isPublic: note.isPublic,
+              doodleData: note.doodleData,
               onTap: () async {
                 await Navigator.push(
                   context,
