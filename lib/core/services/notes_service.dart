@@ -5,6 +5,7 @@ import '../models/note_model.dart';
 
 class NotesService {
   final Databases _databases = AppwriteService().databases;
+  final Storage _storage = AppwriteService().storage;
 
   Future<List<Note>> listNotes(String userId) async {
     try {
@@ -149,5 +150,27 @@ class NotesService {
     } catch (e) {
       throw Exception('Failed to delete note: $e');
     }
+  }
+
+  Future<String> uploadAttachment(String filePath, String fileName) async {
+    try {
+      final file = await _storage.createFile(
+        bucketId: AppwriteConstants.notesAttachmentsBucketId,
+        fileId: ID.unique(),
+        file: InputFile.fromPath(path: filePath, filename: fileName),
+      );
+      return file.$id;
+    } catch (e) {
+      throw Exception('Failed to upload attachment: $e');
+    }
+  }
+
+  String getFilePreview(String fileId) {
+    return _storage
+        .getFilePreview(
+          bucketId: AppwriteConstants.notesAttachmentsBucketId,
+          fileId: fileId,
+        )
+        .toString();
   }
 }

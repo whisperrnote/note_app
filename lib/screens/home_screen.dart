@@ -474,8 +474,9 @@ class _NotesGrid extends StatelessWidget {
   final List<Note> notes;
   final bool isLoading;
   final Future<void> Function() onRefresh;
+  final NotesService _notesService = NotesService();
 
-  const _NotesGrid({
+  _NotesGrid({
     required this.crossAxisCount,
     required this.notes,
     required this.isLoading,
@@ -555,11 +556,31 @@ class _NotesGrid extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Wrap(
           children: [
-            _ContextItem(LucideIcons.pin, 'Pin Note'),
+            _ContextItem(
+              note.isPinned ? LucideIcons.pinOff : LucideIcons.pin,
+              note.isPinned ? 'Unpin Note' : 'Pin Note',
+              onTap: () async {
+                Navigator.pop(context);
+                await _notesService.updateNote(
+                  noteId: note.id,
+                  isPinned: !note.isPinned,
+                );
+                onRefresh();
+              },
+            ),
             _ContextItem(LucideIcons.share2, 'Share'),
             _ContextItem(LucideIcons.copy, 'Duplicate'),
             const Divider(color: AppColors.borderSubtle, height: 32),
-            _ContextItem(LucideIcons.trash2, 'Delete', isDestructive: true),
+            _ContextItem(
+              LucideIcons.trash2,
+              'Delete',
+              isDestructive: true,
+              onTap: () async {
+                Navigator.pop(context);
+                await _notesService.deleteNote(note.id);
+                onRefresh();
+              },
+            ),
           ],
         ),
       ),
@@ -571,8 +592,14 @@ class _ContextItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool isDestructive;
+  final VoidCallback? onTap;
 
-  const _ContextItem(this.icon, this.label, {this.isDestructive = false});
+  const _ContextItem(
+    this.icon,
+    this.label, {
+    this.isDestructive = false,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -588,7 +615,7 @@ class _ContextItem extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
-      onTap: () {},
+      onTap: onTap,
     );
   }
 }
