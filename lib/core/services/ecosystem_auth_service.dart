@@ -10,12 +10,7 @@ class EcosystemAuthService {
       groupId: _groupId,
       accessibility: KeychainAccessibility.first_unlock,
     ),
-    mOptions: AndroidOptions(encryptedSharedPreferences: true),
-    // Correct parameter names for different platforms
-    aOptions: AppleOptions(
-      groupId: _groupId,
-      accessibility: KeychainAccessibility.first_unlock,
-    ),
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
   );
 
   /// Saves the user ID and session secret to the shared vault.
