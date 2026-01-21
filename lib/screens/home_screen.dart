@@ -277,7 +277,8 @@ class _SidebarItem extends StatelessWidget {
 
 class _HomeHeader extends StatelessWidget {
   final bool isDesktop;
-  const _HomeHeader({this.isDesktop = false});
+  final Future<void> Function()? onRefresh;
+  const _HomeHeader({this.isDesktop = false, this.onRefresh});
 
   @override
   Widget build(BuildContext context) {
