@@ -11,6 +11,7 @@ import '../core/services/notes_service.dart';
 import '../core/providers/auth_provider.dart';
 import 'doodle_canvas_screen.dart';
 import '../core/theme/glass_route.dart';
+import '../core/theme/doodle_painter.dart';
 
 class NoteDetailScreen extends StatefulWidget {
   final Note note;
@@ -285,8 +286,14 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       ),
       child: Stack(
         children: [
-          const Center(
-            child: Icon(LucideIcons.image, color: AppColors.gunmetal, size: 24),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: CustomPaint(
+                size: const Size(double.infinity, 150),
+                painter: DoodlePainter(doodleData: _doodleData!),
+              ),
+            ),
           ),
           Positioned(
             top: 8,
@@ -303,7 +310,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
             bottom: 8,
             left: 12,
             child: Text(
-              'DOODLE COMPONENT',
+              'DOODLE ATTACHMENT',
               style: GoogleFonts.spaceMono(
                 fontSize: 8,
                 color: AppColors.gunmetal,
