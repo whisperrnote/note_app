@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
 import '../core/theme/colors.dart';
-
 import '../widgets/glass_card.dart';
+import '../core/services/notes_service.dart';
+import '../core/providers/auth_provider.dart';
 
 class SaveIntent extends Intent {
   const SaveIntent();
@@ -23,7 +25,8 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
   final TextEditingController _contentController = TextEditingController();
   final TextEditingController _tagController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  
+  final NotesService _notesService = NotesService();
+
   bool _isPublic = false;
   String _format = 'text'; // 'text' | 'doodle'
   List<String> _tags = [];
@@ -46,34 +49,40 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
   }
 
   Future<void> _handleSave() async {
-    if (_titleController.text.isEmpty && _contentController.text.isEmpty) return;
+    if (_titleController.text.isEmpty && _contentController.text.isEmpty)
+      return;
 
     setState(() => _isLoading = true);
-    
-    // Simulate API delay "Synthesizing"
-    await Future.delayed(const Duration(milliseconds: 1500));
-    
-    if (mounted) {
-      Navigator.pop(context);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    try {
+      if (authProvider.user != null) {
+        await _notesService.createNote(
+          authProvider.user!.$id,
+          _titleController.text,
+          _contentController.text,
+          _tags,
+          _isPublic,
+        );
+        if (mounted) Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to publish: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Shortcuts(
-      shortcuts: <LogicalKeySet, Intent>{
-        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS): const SaveIntent(),
-        LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyS): const SaveIntent(),
-      },
-      child: Actions(
-        actions: <Type, Action<Intent>>{
-          SaveIntent: CallbackAction<SaveIntent>(onInvoke: (intent) => _handleSave()),
-        },
-        child: Scaffold(
-          backgroundColor: AppColors.voidBg,
-          body: Stack(
-            children: [
-
+    return Scaffold(
+      backgroundColor: AppColors.voidBg,
+      body: Stack(
+        children: [
           // Ambient Background Glow
           Positioned(
             top: -100,
@@ -129,7 +138,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                           ),
                           textCapitalization: TextCapitalization.sentences,
                         ),
-                        
+
                         const SizedBox(height: 32),
 
                         // Privacy Toggle
@@ -153,7 +162,9 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      _isPublic ? 'Publicly shared' : 'End-to-End Encrypted',
+                                      _isPublic
+                                          ? 'Publicly shared'
+                                          : 'End-to-End Encrypted',
                                       style: GoogleFonts.inter(
                                         fontSize: 13,
                                         color: AppColors.titanium,
@@ -165,7 +176,8 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                               ),
                               Switch(
                                 value: _isPublic,
-                                onChanged: (val) => setState(() => _isPublic = val),
+                                onChanged: (val) =>
+                                    setState(() => _isPublic = val),
                                 activeColor: AppColors.electric,
                                 activeTrackColor: AppColors.electricDim,
                                 inactiveThumbColor: AppColors.gunmetal,
@@ -179,7 +191,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
 
                         // Content Area
                         _buildLabel('MANIFESTATION'),
-                        
+
                         TextField(
                           controller: _contentController,
                           maxLines: null,
@@ -196,15 +208,22 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
-                              borderSide: const BorderSide(color: AppColors.borderSubtle),
+                              borderSide: const BorderSide(
+                                color: AppColors.borderSubtle,
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
-                              borderSide: const BorderSide(color: AppColors.borderSubtle),
+                              borderSide: const BorderSide(
+                                color: AppColors.borderSubtle,
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
-                              borderSide: const BorderSide(color: AppColors.electric, width: 1.5),
+                              borderSide: const BorderSide(
+                                color: AppColors.electric,
+                                width: 1.5,
+                              ),
                             ),
                             filled: true,
                             fillColor: AppColors.surface.withOpacity(0.3),
@@ -224,16 +243,24 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                               Expanded(
                                 child: TextField(
                                   controller: _tagController,
-                                  style: GoogleFonts.inter(color: AppColors.titanium),
+                                  style: GoogleFonts.inter(
+                                    color: AppColors.titanium,
+                                  ),
                                   decoration: InputDecoration(
                                     hintText: 'Add a tag...',
-                                    hintStyle: GoogleFonts.inter(color: AppColors.gunmetal, fontSize: 14),
+                                    hintStyle: GoogleFonts.inter(
+                                      color: AppColors.gunmetal,
+                                      fontSize: 14,
+                                    ),
                                     isDense: true,
                                     filled: false,
                                     border: InputBorder.none,
                                     enabledBorder: InputBorder.none,
                                     focusedBorder: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 12,
+                                    ),
                                   ),
                                   onSubmitted: (_) => _addTag(),
                                 ),
@@ -242,9 +269,15 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                                 onPressed: _addTag,
                                 style: IconButton.styleFrom(
                                   backgroundColor: AppColors.surface2,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                 ),
-                                icon: const Icon(LucideIcons.plus, color: AppColors.electric, size: 20),
+                                icon: const Icon(
+                                  LucideIcons.plus,
+                                  color: AppColors.electric,
+                                  size: 20,
+                                ),
                               ),
                             ],
                           ),
@@ -253,35 +286,50 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: _tags.map((tag) => Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: AppColors.electricDim,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: AppColors.electric.withOpacity(0.2)),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  tag.toUpperCase(),
-                                  style: GoogleFonts.spaceGrotesk(
-                                    color: AppColors.electric,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 10,
-                                    letterSpacing: 0.5,
+                          children: _tags
+                              .map(
+                                (tag) => Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.electricDim,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AppColors.electric.withOpacity(
+                                        0.2,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        tag.toUpperCase(),
+                                        style: GoogleFonts.spaceGrotesk(
+                                          color: AppColors.electric,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 10,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      GestureDetector(
+                                        onTap: () => _removeTag(tag),
+                                        child: const Icon(
+                                          LucideIcons.x,
+                                          size: 12,
+                                          color: AppColors.electric,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(width: 6),
-                                GestureDetector(
-                                  onTap: () => _removeTag(tag),
-                                  child: const Icon(LucideIcons.x, size: 12, color: AppColors.electric),
-                                ),
-                              ],
-                            ),
-                          )).toList(),
+                              )
+                              .toList(),
                         ),
-                        
+
                         const SizedBox(height: 120),
                       ],
                     ),
@@ -291,13 +339,16 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
             ),
           ),
 
-          // Bottom Actions
           Positioned(
-            left: 0, right: 0, bottom: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
             child: GlassCard(
               borderRadius: BorderRadius.zero,
               opacity: 0.9,
-              border: const Border(top: BorderSide(color: AppColors.borderSubtle)),
+              border: const Border(
+                top: BorderSide(color: AppColors.borderSubtle),
+              ),
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -316,23 +367,30 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.electric,
                       foregroundColor: AppColors.voidBg,
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 16,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: _isLoading 
-                    ? const SizedBox(
-                        width: 20, height: 20, 
-                        child: CircularProgressIndicator(color: AppColors.voidBg, strokeWidth: 2)
-                      )
-                    : Text(
-                        'PUBLISH',
-                        style: GoogleFonts.spaceGrotesk(
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1,
-                        ),
-                      ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: AppColors.voidBg,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            'PUBLISH',
+                            style: GoogleFonts.spaceGrotesk(
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1,
+                            ),
+                          ),
                   ),
                 ],
               ),
@@ -347,7 +405,8 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 44, height: 44,
+        width: 44,
+        height: 44,
         decoration: BoxDecoration(
           color: AppColors.surface2,
           borderRadius: BorderRadius.circular(14),
@@ -373,7 +432,11 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppColors.borderSubtle),
             ),
-            child: const Icon(LucideIcons.filePlus, color: AppColors.electric, size: 20),
+            child: const Icon(
+              LucideIcons.filePlus,
+              color: AppColors.electric,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 16),
           Column(
@@ -403,7 +466,11 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
           const Spacer(),
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(LucideIcons.x, color: AppColors.gunmetal, size: 20),
+            icon: const Icon(
+              LucideIcons.x,
+              color: AppColors.gunmetal,
+              size: 20,
+            ),
           ),
         ],
       ),
@@ -436,9 +503,9 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(
-          icon, 
-          size: 18, 
-          color: isSelected ? AppColors.voidBg : AppColors.gunmetal
+          icon,
+          size: 18,
+          color: isSelected ? AppColors.voidBg : AppColors.gunmetal,
         ),
       ),
     );
