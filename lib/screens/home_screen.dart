@@ -29,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Note> _notes = [];
   bool _isLoading = true;
   StreamSubscription? _realtimeSubscription;
+  Note? _selectedNote;
 
   @override
   void initState() {
@@ -81,10 +82,41 @@ class _HomeScreenState extends State<HomeScreen> {
             isLoading: _isLoading,
             onRefresh: _fetchNotes,
           ),
-          desktop: _DesktopHome(
-            notes: _notes,
-            isLoading: _isLoading,
-            onRefresh: _fetchNotes,
+          desktop: Row(
+            children: [
+              _DesktopSidebar(),
+              const VerticalDivider(width: 1, color: AppColors.borderSubtle),
+              Expanded(
+                flex: 3,
+                child: Column(
+                  children: [
+                    _HomeHeader(isDesktop: true, onRefresh: _fetchNotes),
+                    _TagsSection(),
+                    Expanded(
+                      child: _NotesGrid(
+                        crossAxisCount: 2,
+                        notes: _notes,
+                        isLoading: _isLoading,
+                        onRefresh: _fetchNotes,
+                        onNoteSelected: (note) {
+                          setState(() => _selectedNote = note);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (_selectedNote != null) ...[
+                const VerticalDivider(width: 1, color: AppColors.borderSubtle),
+                Expanded(
+                  flex: 4,
+                  child: NoteDetailScreen(
+                    key: ValueKey(_selectedNote!.id),
+                    note: _selectedNote!,
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ),
@@ -495,6 +527,7 @@ class _NotesGrid extends StatelessWidget {
   final List<Note> notes;
   final bool isLoading;
   final Future<void> Function() onRefresh;
+  final Function(Note)? onNoteSelected;
   final NotesService _notesService = NotesService();
 
   _NotesGrid({
@@ -502,6 +535,7 @@ class _NotesGrid extends StatelessWidget {
     required this.notes,
     required this.isLoading,
     required this.onRefresh,
+    this.onNoteSelected,
   });
 
   @override
