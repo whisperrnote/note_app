@@ -132,7 +132,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                       const SizedBox(height: 12),
                       _buildMetaRow(),
                       const SizedBox(height: 32),
-                      _buildDoodleSection(),
+                      RepaintBoundary(child: _buildDoodleSection()),
                       const SizedBox(height: 12),
                       _buildAttachmentSection(),
                       const SizedBox(height: 12),
