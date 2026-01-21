@@ -12,6 +12,7 @@ import 'create_note_screen.dart';
 import 'note_detail_screen.dart';
 import '../widgets/glass_card.dart';
 import 'focus_mode_screen.dart';
+import 'settings_screen.dart';
 import '../core/theme/glass_route.dart';
 import '../widgets/responsive_layout.dart';
 
@@ -123,8 +124,8 @@ class _MobileHome extends StatelessWidget {
       backgroundColor: AppColors.surface,
       child: Column(
         children: [
-          const _HomeHeader(),
-          const _TagsSection(),
+          _HomeHeader(),
+          _TagsSection(),
           Expanded(
             child: _NotesGrid(
               crossAxisCount: 2,
@@ -160,7 +161,7 @@ class _DesktopHome extends StatelessWidget {
           child: Column(
             children: [
               _HomeHeader(isDesktop: true, onRefresh: onRefresh),
-              const _TagsSection(),
+              _TagsSection(),
               Expanded(
                 child: _NotesGrid(
                   crossAxisCount: 3,
@@ -470,10 +471,44 @@ class _TagChip extends StatelessWidget {
 
 class _NotesGrid extends StatelessWidget {
   final int crossAxisCount;
-  const _NotesGrid({required this.crossAxisCount});
+  final List<Note> notes;
+  final bool isLoading;
+  final Future<void> Function() onRefresh;
+
+  const _NotesGrid({
+    required this.crossAxisCount,
+    required this.notes,
+    required this.isLoading,
+    required this.onRefresh,
+  });
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.electric),
+      );
+    }
+
+    if (notes.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(LucideIcons.ghost, size: 64, color: AppColors.gunmetal),
+            const SizedBox(height: 16),
+            Text(
+              'No notes found in the void',
+              style: GoogleFonts.spaceGrotesk(
+                color: AppColors.gunmetal,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return GridView.builder(
       padding: const EdgeInsets.all(24),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -482,28 +517,24 @@ class _NotesGrid extends StatelessWidget {
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
       ),
-      itemCount: 8,
+      itemCount: notes.length,
       itemBuilder: (context, index) {
+        final note = notes[index];
         return NoteCard(
-              title: index == 0
-                  ? 'Glass Monolith Design'
-                  : (index == 1 ? 'AI System Architecture' : ''),
-              content: index == 0
-                  ? 'The aesthetic is "Quiet Power." We do not shout. We operate in the void...'
-                  : 'Modular integration of Google Gemini AI across the ecosystem apps...',
-              tags: index == 0
-                  ? ['design', 'brand']
-                  : (index == 1 ? ['ai', 'tech'] : []),
-              isPinned: index < 2,
-              isPublic: index == 2,
-              onTap: () {
-                Navigator.push(
+              title: note.title,
+              content: note.content,
+              tags: note.tags,
+              isPinned: note.isPinned,
+              isPublic: note.isPublic,
+              onTap: () async {
+                await Navigator.push(
                   context,
-                  GlassRoute(page: const CreateNoteScreen()),
+                  GlassRoute(page: NoteDetailScreen(note: note)),
                 );
+                onRefresh();
               },
               onLongPress: () {
-                _showContextMenu(context);
+                _showContextMenu(context, note);
               },
             )
             .animate()
@@ -513,7 +544,7 @@ class _NotesGrid extends StatelessWidget {
     );
   }
 
-  void _showContextMenu(BuildContext context) {
+  void _showContextMenu(BuildContext context, Note note) {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.surface,
