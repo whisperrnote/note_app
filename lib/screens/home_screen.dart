@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -27,11 +28,31 @@ class _HomeScreenState extends State<HomeScreen> {
   final NotesService _notesService = NotesService();
   List<Note> _notes = [];
   bool _isLoading = true;
+  StreamSubscription? _realtimeSubscription;
 
   @override
   void initState() {
     super.initState();
     _fetchNotes();
+    _initRealtime();
+  }
+
+  void _initRealtime() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (authProvider.user != null) {
+      _realtimeSubscription = _notesService
+          .subscribeToNotes(authProvider.user!.$id)
+          .stream
+          .listen((event) {
+            _fetchNotes();
+          });
+    }
+  }
+
+  @override
+  void dispose() {
+    _realtimeSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _fetchNotes() async {

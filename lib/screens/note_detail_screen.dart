@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -12,6 +13,7 @@ import '../core/providers/auth_provider.dart';
 import 'doodle_canvas_screen.dart';
 import '../core/theme/glass_route.dart';
 import '../core/theme/doodle_painter.dart';
+import '../core/models/user_model.dart';
 
 class NoteDetailScreen extends StatefulWidget {
   final Note note;
@@ -26,9 +28,12 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   late TextEditingController _contentController;
   String? _doodleData;
   List<String> _attachmentIds = [];
+  List<String> _collaboratorIds = [];
+  List<UserModel> _collaborators = [];
   final NotesService _notesService = NotesService();
   bool _isEditing = false;
   bool _isLoading = false;
+  StreamSubscription? _commentsSubscription;
 
   @override
   void initState() {
@@ -37,6 +42,33 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     _contentController = TextEditingController(text: widget.note.content);
     _doodleData = widget.note.doodleData;
     _attachmentIds = List.from(widget.note.attachmentIds);
+    _collaboratorIds = List.from(widget.note.collaboratorIds);
+    _fetchCollaboratorProfiles();
+    _initRealtimeComments();
+  }
+
+  void _initRealtimeComments() {
+    _commentsSubscription = _notesService
+        .subscribeToComments(widget.note.id)
+        .stream
+        .listen((event) {
+          if (mounted) setState(() {});
+        });
+  }
+
+  @override
+  void dispose() {
+    _commentsSubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _fetchCollaboratorProfiles() async {
+    final profiles = <UserModel>[];
+    for (var id in _collaboratorIds) {
+      final user = await _notesService.getUserById(id);
+      if (user != null) profiles.add(user);
+    }
+    if (mounted) setState(() => _collaborators = profiles);
   }
 
   Future<void> _handleSave() async {
@@ -48,6 +80,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         content: _contentController.text,
         doodleData: _doodleData,
         attachmentIds: _attachmentIds,
+        collaboratorIds: _collaboratorIds,
       );
       setState(() => _isEditing = false);
     } catch (e) {
@@ -451,10 +484,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         const SizedBox(height: 16),
         Row(
           children: [
-            _buildAvatar('U'),
-            const SizedBox(width: -8),
-            _buildAvatar('A', color: Colors.purple),
-            const SizedBox(width: 12),
+            ..._collaborators.map(
+              (u) => Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: _buildAvatar(u.name.substring(0, 1).toUpperCase()),
+              ),
+            ),
+            const SizedBox(width: 8),
             _buildAddCollaborator(),
           ],
         ),
@@ -487,15 +523,44 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   }
 
   Widget _buildAddCollaborator() {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: AppColors.surface2,
-        shape: BoxShape.circle,
-        border: Border.all(color: AppColors.borderSubtle),
+    return GestureDetector(
+      onTap: _showCollaboratorSearch,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: AppColors.surface2,
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.borderSubtle),
+        ),
+        child: const Icon(
+          LucideIcons.plus,
+          size: 14,
+          color: AppColors.gunmetal,
+        ),
       ),
-      child: const Icon(LucideIcons.plus, size: 14, color: AppColors.gunmetal),
+    );
+  }
+
+  void _showCollaboratorSearch() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => _CollaboratorSearchSheet(
+        onUserSelected: (user) async {
+          if (!_collaboratorIds.contains(user.id)) {
+            setState(() {
+              _collaboratorIds.add(user.id);
+              _collaborators.add(user);
+            });
+            if (!_isEditing) await _handleSave();
+          }
+        },
+      ),
     );
   }
 
@@ -622,6 +687,122 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         fontWeight: FontWeight.w900,
         color: AppColors.gunmetal,
         letterSpacing: 2,
+      ),
+    );
+  }
+}
+
+class _CollaboratorSearchSheet extends StatefulWidget {
+  final Function(UserModel) onUserSelected;
+  const _CollaboratorSearchSheet({required this.onUserSelected});
+
+  @override
+  State<_CollaboratorSearchSheet> createState() =>
+      _CollaboratorSearchSheetState();
+}
+
+class _CollaboratorSearchSheetState extends State<_CollaboratorSearchSheet> {
+  final NotesService _notesService = NotesService();
+  final TextEditingController _searchController = TextEditingController();
+  List<UserModel> _results = [];
+  bool _isSearching = false;
+
+  void _performSearch(String query) async {
+    if (query.length < 2) return;
+    setState(() => _isSearching = true);
+    try {
+      final users = await _notesService.searchUsers(query);
+      setState(() => _results = users);
+    } catch (e) {
+      // Handle error
+    } finally {
+      setState(() => _isSearching = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(
+        top: 24,
+        left: 24,
+        right: 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'ADD COLLABORATOR',
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+              color: AppColors.electric,
+              letterSpacing: 2,
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _searchController,
+            autofocus: true,
+            style: GoogleFonts.inter(color: AppColors.titanium),
+            onChanged: _performSearch,
+            decoration: InputDecoration(
+              hintText: 'Search name or email...',
+              hintStyle: GoogleFonts.inter(color: AppColors.gunmetal),
+              filled: true,
+              fillColor: AppColors.surface2,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              prefixIcon: const Icon(
+                LucideIcons.search,
+                size: 16,
+                color: AppColors.gunmetal,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (_isSearching)
+            const Center(child: CircularProgressIndicator())
+          else if (_results.isEmpty && _searchController.text.length >= 2)
+            const Center(
+              child: Text(
+                'No users found.',
+                style: TextStyle(color: AppColors.gunmetal),
+              ),
+            ),
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: _results.length,
+            itemBuilder: (context, index) {
+              final user = _results[index];
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: AppColors.electric,
+                  child: Text(
+                    user.name.substring(0, 1).toUpperCase(),
+                    style: const TextStyle(color: AppColors.voidBg),
+                  ),
+                ),
+                title: Text(
+                  user.name,
+                  style: const TextStyle(color: AppColors.titanium),
+                ),
+                subtitle: Text(
+                  user.email,
+                  style: const TextStyle(color: AppColors.gunmetal),
+                ),
+                onTap: () {
+                  widget.onUserSelected(user);
+                  Navigator.pop(context);
+                },
+              );
+            },
+          ),
+        ],
       ),
     );
   }

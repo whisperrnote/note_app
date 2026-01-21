@@ -7,6 +7,19 @@ import '../models/user_model.dart';
 class NotesService {
   final Databases _databases = AppwriteService().databases;
   final Storage _storage = AppwriteService().storage;
+  final Realtime _realtime = AppwriteService().realtime;
+
+  RealtimeSubscription subscribeToNotes(String userId) {
+    return _realtime.subscribe([
+      'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.notesCollectionId}.documents',
+    ]);
+  }
+
+  RealtimeSubscription subscribeToComments(String noteId) {
+    return _realtime.subscribe([
+      'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.commentsCollectionId}.documents',
+    ]);
+  }
 
   Future<List<Note>> listNotes(String userId) async {
     try {
