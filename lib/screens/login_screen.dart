@@ -146,8 +146,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           _buildSocialButton(LucideIcons.shieldCheck, 'PASSKEY'),
-                          const SizedBox(width: 16),
-                          _buildSocialButton(LucideIcons.key, 'MASTERPASS'),
                         ],
                       ).animate().fadeIn(duration: 800.ms, delay: 600.ms),
                     ],
