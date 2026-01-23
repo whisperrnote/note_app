@@ -18,6 +18,8 @@ import 'focus_mode_screen.dart';
 import 'settings_screen.dart';
 import '../core/theme/glass_route.dart';
 import '../widgets/responsive_layout.dart';
+import '../core/constants/app_constants.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,7 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _fetchNotes();
-    _initRealtime();
+    if (!AppConstants.useMockMode) {
+      _initRealtime();
+    }
   }
 
   void _initRealtime() {
