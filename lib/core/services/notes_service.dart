@@ -3,6 +3,7 @@ import '../constants/appwrite_constants.dart';
 import 'appwrite_service.dart';
 import '../models/note_model.dart';
 import '../models/user_model.dart';
+import '../constants/app_constants.dart';
 
 class NotesService {
   final Databases _databases = AppwriteService().databases;
@@ -22,6 +23,30 @@ class NotesService {
   }
 
   Future<List<Note>> listNotes(String userId) async {
+    if (AppConstants.useMockMode) {
+      return [
+        Note(
+          id: '1',
+          title: 'Welcome to WhisperrNote',
+          content: 'This is a mock note for testing.',
+          tags: ['welcome', 'mock'],
+          isPublic: false,
+          userId: userId,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+        Note(
+          id: '2',
+          title: 'Mock Note 2',
+          content: 'Another mock note content.',
+          tags: ['test'],
+          isPublic: false,
+          userId: userId,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ];
+    }
     try {
       final response = await _databases.listDocuments(
         databaseId: AppwriteConstants.databaseId,
