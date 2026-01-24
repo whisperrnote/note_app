@@ -105,11 +105,11 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         );
       case 1:
-        return _ComingSoon(title: 'Shared Links', icon: LucideIcons.link2);
+        return const SharedNotesScreen();
       case 2:
-        return _ComingSoon(title: 'Tags Explorer', icon: LucideIcons.tag);
+        return const TagsScreen();
       case 3:
-        return _ComingSoon(title: 'Extensions (Caps)', icon: LucideIcons.puzzle);
+        return const ExtensionsScreen();
       default:
         return const SizedBox.shrink();
     }
@@ -125,8 +125,10 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Column(
                 children: [
-                  _HomeHeader(onRefresh: _fetchNotes),
-                  if (_selectedIndex == 0) _TagsSection(),
+                  if (_selectedIndex == 0) ...[
+                    _HomeHeader(onRefresh: _fetchNotes),
+                    _TagsSection(),
+                  ],
                   Expanded(child: _buildBody()),
                 ],
               ),

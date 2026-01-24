@@ -14,6 +14,7 @@ import 'doodle_canvas_screen.dart';
 import '../core/theme/glass_route.dart';
 import '../core/theme/doodle_painter.dart';
 import '../core/models/user_model.dart';
+import '../widgets/share_note_modal.dart';
 
 class NoteDetailScreen extends StatefulWidget {
   final Note note;
@@ -210,7 +211,17 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
               color: AppColors.gunmetal,
               size: 20,
             ),
-            onPressed: () {},
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => ShareNoteModal(
+                  noteId: widget.note.id,
+                  noteTitle: widget.note.title,
+                ),
+              );
+            },
           ),
           IconButton(
             icon: const Icon(
