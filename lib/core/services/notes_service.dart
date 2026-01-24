@@ -232,6 +232,19 @@ class NotesService {
     }
   }
 
+  Future<Note?> getNoteById(String noteId) async {
+    try {
+      final doc = await _databases.getDocument(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.notesCollectionId,
+        documentId: noteId,
+      );
+      return Note.fromJson(doc.data);
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<void> deleteNote(String noteId) async {
     try {
       await _databases.deleteDocument(
