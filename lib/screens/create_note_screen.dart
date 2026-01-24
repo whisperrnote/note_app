@@ -121,15 +121,15 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                         TextField(
                           controller: _titleController,
                           style: GoogleFonts.spaceGrotesk(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.titanium,
-                            letterSpacing: -0.5,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: -1,
                           ),
                           decoration: InputDecoration(
-                            hintText: 'Title your thought...',
+                            hintText: 'Note Title',
                             hintStyle: GoogleFonts.spaceGrotesk(
-                              color: AppColors.gunmetal.withOpacity(0.3),
+                              color: Colors.white.withOpacity(0.2),
                             ),
                             border: InputBorder.none,
                             enabledBorder: InputBorder.none,
@@ -152,7 +152,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'VAULT STATUS',
+                                      'VISIBILITY',
                                       style: GoogleFonts.spaceGrotesk(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w900,
@@ -163,8 +163,8 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                                     const SizedBox(height: 4),
                                     Text(
                                       _isPublic
-                                          ? 'Publicly shared'
-                                          : 'End-to-End Encrypted',
+                                          ? 'Public (Anyone with link)'
+                                          : 'Private (Only you)',
                                       style: GoogleFonts.inter(
                                         fontSize: 13,
                                         color: AppColors.titanium,
@@ -174,14 +174,20 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                                   ],
                                 ),
                               ),
-                              Switch(
-                                value: _isPublic,
-                                onChanged: (val) =>
-                                    setState(() => _isPublic = val),
-                                activeColor: AppColors.electric,
-                                activeTrackColor: AppColors.electricDim,
-                                inactiveThumbColor: AppColors.gunmetal,
-                                inactiveTrackColor: AppColors.surface2,
+                              Row(
+                                children: [
+                                  _VisibilityButton(
+                                    label: 'Private',
+                                    isSelected: !_isPublic,
+                                    onTap: () => setState(() => _isPublic = false),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  _VisibilityButton(
+                                    label: 'Public',
+                                    isSelected: _isPublic,
+                                    onTap: () => setState(() => _isPublic = true),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -367,9 +373,10 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.electric,
                       foregroundColor: AppColors.voidBg,
+                      elevation: 0,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 32,
-                        vertical: 16,
+                        vertical: 18,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -385,10 +392,11 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                             ),
                           )
                         : Text(
-                            'PUBLISH',
+                            'SAVE NOTE',
                             style: GoogleFonts.spaceGrotesk(
                               fontWeight: FontWeight.w900,
-                              letterSpacing: 1,
+                              letterSpacing: 0.5,
+                              fontSize: 15,
                             ),
                           ),
                   ),
@@ -506,6 +514,43 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
           icon,
           size: 18,
           color: isSelected ? AppColors.voidBg : AppColors.gunmetal,
+        ),
+      ),
+    );
+  }
+}
+
+class _VisibilityButton extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _VisibilityButton({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.electric.withOpacity(0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected ? AppColors.electric.withOpacity(0.2) : AppColors.borderSubtle,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 12,
+            fontWeight: FontWeight.w900,
+            color: isSelected ? AppColors.electric : AppColors.gunmetal,
+          ),
         ),
       ),
     );
