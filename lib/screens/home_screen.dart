@@ -14,6 +14,7 @@ import '../core/services/notes_service.dart';
 import '../core/models/note_model.dart';
 import '../widgets/bottom_nav.dart';
 import '../widgets/ecosystem_portal.dart';
+import '../widgets/share_note_modal.dart';
 import 'create_note_screen.dart';
 import 'shared_notes_screen.dart';
 import 'tags_screen.dart';
@@ -717,6 +718,17 @@ class _NotesGrid extends StatelessWidget {
               isPublic: note.isPublic,
               doodleData: note.doodleData,
               updatedAt: note.updatedAt,
+              onShare: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => ShareNoteModal(
+                    noteId: note.id,
+                    noteTitle: note.title,
+                  ),
+                );
+              },
               onTap: () async {
                 if (onNoteSelected != null) {
                   onNoteSelected!(note);
