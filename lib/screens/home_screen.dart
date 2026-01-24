@@ -13,6 +13,7 @@ import '../core/providers/auth_provider.dart';
 import '../core/services/notes_service.dart';
 import '../core/models/note_model.dart';
 import '../widgets/bottom_nav.dart';
+import '../widgets/ecosystem_portal.dart';
 import 'create_note_screen.dart';
 import 'note_detail_screen.dart';
 import 'focus_mode_screen.dart';
@@ -575,7 +576,10 @@ class _HomeHeader extends StatelessWidget {
           HeaderAction(
             icon: LucideIcons.layoutGrid,
             onTap: () {
-              // Ecosystem Portal
+              showDialog(
+                context: context,
+                builder: (context) => const EcosystemPortal(),
+              );
             },
           ),
           const SizedBox(width: 8),
