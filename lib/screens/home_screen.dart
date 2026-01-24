@@ -707,6 +707,7 @@ class _NotesGrid extends StatelessWidget {
               isPinned: note.isPinned,
               isPublic: note.isPublic,
               doodleData: note.doodleData,
+              updatedAt: note.updatedAt,
               onTap: () async {
                 if (onNoteSelected != null) {
                   onNoteSelected!(note);
