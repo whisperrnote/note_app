@@ -62,6 +62,59 @@ class NotesService {
     }
   }
 
+  Future<List<Note>> getSharedNotes(String userId) async {
+    try {
+      final response = await _databases.listDocuments(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.notesCollectionId,
+        queries: [
+          Query.contains('collaboratorIds', [userId]),
+          Query.orderDesc('\$createdAt'),
+        ],
+      );
+      return response.documents.map((doc) => Note.fromJson(doc.data)).toList();
+    } catch (e) {
+      throw Exception('Failed to get shared notes: $e');
+    }
+  }
+
+  Future<List<Note>> listPublicNotesByUser(String userId) async {
+    try {
+      final response = await _databases.listDocuments(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.notesCollectionId,
+        queries: [
+          Query.equal('userId', userId),
+          Query.equal('isPublic', true),
+          Query.orderDesc('\$createdAt'),
+        ],
+      );
+      return response.documents.map((doc) => Note.fromJson(doc.data)).toList();
+    } catch (e) {
+      throw Exception('Failed to list public notes: $e');
+    }
+  }
+
+  Future<List<Note>> listNotesBySearch(String userId, String query) async {
+    try {
+      final response = await _databases.listDocuments(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.notesCollectionId,
+        queries: [
+          Query.equal('userId', userId),
+          Query.or([
+            Query.search('title', query),
+            Query.search('content', query),
+          ]),
+          Query.orderDesc('\$createdAt'),
+        ],
+      );
+      return response.documents.map((doc) => Note.fromJson(doc.data)).toList();
+    } catch (e) {
+      throw Exception('Failed to search notes: $e');
+    }
+  }
+
   Future<Note> createNote({
     required String userId,
     required String title,
